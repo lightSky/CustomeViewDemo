@@ -1,24 +1,33 @@
-package sky.light.com.customeviewdemo;
+package cn.lightsky.customeviewdemo;
 
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-import infiniteviewpager.Logger;
-import salvage.RecyclingPagerAdapter;
+import java.util.List;
+
+import com.jakewharton.salvage.RecyclingPagerAdapter;
+import sky.light.com.customeviewdemo.R;
 
 public class PageAdapter  extends RecyclingPagerAdapter{
-    private static final int[] mDrawableResIds = {R.drawable.a,R.drawable.b,R.drawable.c,R.drawable.d};
+
 	private Context mContext;
 	private LayoutInflater inflater;
 
     public static final String DEBUG_TAG = "ImageView__ActionEvent";
+    private boolean isInfiniteLoop;
+    List<Integer> drawableIds;
+    int size;
 
-    public PageAdapter(Context context) {
+    public PageAdapter(Context context,List<Integer> drawableIds) {
 		mContext = context;
 		inflater = LayoutInflater.from(context);
+        size = drawableIds == null ? 0 : drawableIds.size();
+        this.drawableIds = drawableIds;
+        isInfiniteLoop = false;
 	}
 	
     /**
@@ -27,12 +36,12 @@ public class PageAdapter  extends RecyclingPagerAdapter{
      * @return
      */
     private int getPosition(int position) {
-        return  position % mDrawableResIds.length ;
+        return  isInfiniteLoop ? position % size : position;
     }
 
     @Override
 	public int getCount() {
-		return Integer.MAX_VALUE;
+        return isInfiniteLoop ? Integer.MAX_VALUE : size;
 	}
 
 	@Override
@@ -51,24 +60,38 @@ public class PageAdapter  extends RecyclingPagerAdapter{
 
             @Override
             public void onClick(View v) {
-                Logger.d(DEBUG_TAG, "onClick ....");
+                Toast.makeText(mContext,"onClick",Toast.LENGTH_SHORT).show();
             }
         });
 
         holder.image.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                Logger.d(DEBUG_TAG, "OnLongClick .... ");
-
+                Toast.makeText(mContext,"OnLongClick",Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
 
-        holder.image.setImageResource(mDrawableResIds[position % mDrawableResIds.length]);
+        holder.image.setImageResource(drawableIds.get(getPosition(position)));
         return convertView;
 	}
 
     private static class ViewHolder {
         ImageView image;
+    }
+
+    /**
+     * @return the isInfiniteLoop
+     */
+    public boolean isInfiniteLoop() {
+        return isInfiniteLoop;
+    }
+
+    /**
+     * @param isInfiniteLoop the isInfiniteLoop to set
+     */
+    public PageAdapter setInfiniteLoop(boolean isInfiniteLoop) {
+        this.isInfiniteLoop = isInfiniteLoop;
+        return this;
     }
 }
